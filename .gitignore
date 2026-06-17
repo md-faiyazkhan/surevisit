@@ -1,0 +1,34 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+ml-env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Data files
+data/raw/*.csv
+
+# Environment variables / secrets
+.env
+
+# IDE specific
+.vscode/
+.idea/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Pytest cache
+.pytest_cache/
