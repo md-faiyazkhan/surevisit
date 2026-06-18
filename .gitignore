@@ -32,3 +32,6 @@ Thumbs.db
 
 # Pytest cache
 .pytest_cache/
+
+# info folder
+info/
