@@ -3,6 +3,7 @@ import joblib
 
 OVERALL_NOSHOW_RATE = 0.201933
 NEIGHBOURHOOD_FREQ = joblib.load("models/neighbourhood_freq.joblib")
+FEATURE_COLUMNS = joblib.load("models/feature_columns.joblib")
 
 
 def engineer_features(request_data: dict) -> pd.DataFrame:
@@ -42,5 +43,7 @@ def engineer_features(request_data: dict) -> pd.DataFrame:
     })
 
     df = pd.get_dummies(df, columns=['AppointmentWeekday', 'AgeGroup'])
+
+    df = df.reindex(columns=FEATURE_COLUMNS, fill_value=0)
 
     return df
