@@ -28,8 +28,8 @@ def engineer_features(request_data: dict) -> pd.DataFrame:
 
     df['ChronicDiseaseCount'] = df['hipertension'] + df['diabetes'] + df['alcoholism']
 
-    df['PreviousAttendanceRate'] = df['previous_attendance_rate'].fillna(OVERALL_NOSHOW_RATE)
-    df['RiskHistory'] = df['risk_history'].fillna(0)
+    df['PreviousAttendanceRate'] = df['previous_attendance_rate'].fillna(OVERALL_NOSHOW_RATE).astype(float)
+    df['RiskHistory'] = df['risk_history'].fillna(0).astype(float)
 
     df['ReminderEffectivenessScore'] = df['sms_received'] * (1 - df['PreviousAttendanceRate'])
 
