@@ -1,0 +1,15 @@
+{
+  "gender": "F",
+  "age": 45,
+  "scheduled_day": "2024-05-10",
+  "appointment_day": "2024-05-15",
+  "neighbourhood": "JARDIM DA PENHA",
+  "scholarship": 0,
+  "hipertension": 1,
+  "diabetes": 0,
+  "alcoholism": 0,
+  "handcap": 0,
+  "sms_received": 1,
+  "previous_attendance_rate": null,
+  "risk_history": null
+}
