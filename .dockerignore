@@ -1,0 +1,16 @@
+.venv/
+ml-env/
+venv/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+notebooks/
+info/
+data/
+tests/
+.pytest_cache/
+.vscode/
+.idea/
+*.md
+debug_test.py
