@@ -2,6 +2,7 @@ import streamlit as st
 import sys
 import joblib
 from pathlib import Path
+from datetime import datetime
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
@@ -107,6 +108,13 @@ with right_col:
             st.markdown("**Recommended Action**")
             st.info(result['recommended_action'])
 
+            st.caption("⚠️ This tool provides predictive risk estimates based on historical data and is intended for decision support only. It should not be used as a substitute for clinical or administrative judgment.")
+
+            st.markdown("")
+
+            readable_time = datetime.fromisoformat(result['prediction_timestamp']).strftime("%d %B %Y, %I:%M %p")
+            st.caption(f"Prediction generated on {readable_time}")
+
             with st.expander("Prediction metadata"):
                 st.json(result)
 
@@ -121,4 +129,4 @@ with right_col:
         )
 
 st.divider()
-st.caption("SureVisit — built with Random Forest, SHAP explainability, and FastAPI backend logic.")
+st.caption("SureVisit helps healthcare teams identify at-risk appointments early and take proactive action to reduce missed visits.")
