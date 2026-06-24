@@ -12,3 +12,4 @@ joblib==1.5.3
 pytest==9.0.3
 pytest-cov==7.1.0
 httpx==0.28.1
+streamlit==1.57.0
