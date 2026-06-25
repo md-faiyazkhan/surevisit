@@ -172,6 +172,7 @@ surevisit/
 │   ├── test_health.py
 │   └── test_predict.py
 │
+├── .coverage
 ├── .dockerignore
 ├── .gitignore
 ├── conftest.py
