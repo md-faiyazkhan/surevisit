@@ -135,83 +135,48 @@ This project uses the well-known Kaggle "Medical Appointment No Shows" dataset, 
 
 ```bash
 surevisit/
-
 │
-
 ├── app/
-
-│   ├── init.py
-
-│   ├── main.py              # FastAPI app — health check + predict endpoints
-
-│   ├── predictor.py         # Model loading, prediction, risk tiering, recommendations
-
-│   ├── features.py          # Feature engineering (shared by training & serving)
-
-│   └── schemas.py           # Pydantic request/response models
-
+│   ├── __init__.py
+│   ├── main.py
+│   ├── predictor.py
+│   ├── features.py
+│   └── schemas.py
 │
-
 ├── dashboard/
-
-│   └── streamlit_app.py     # Interactive demo dashboard
-
+│   └── streamlit_app.py
 │
-
 ├── data/
-
-│   ├── raw/                 # Original Kaggle CSV (not committed)
-
-│   └── processed/           # Train/test splits
-
+│   ├── raw/         
+│   └── processed/
+│       ├── X_train.csv                     
+│       ├── X_test.csv                      
+│       ├── y_train.csv                     
+│       └── y_test.csv                      
 │
-
 ├── examples/
-
-│   └── sample_request.json  # Sample API request payload
-
+│   └── sample_request.json
 │
-
 ├── models/
-
-│   ├── final_pipeline.joblib       # Trained Random Forest model
-
-│   ├── neighbourhood_freq.joblib   # Neighbourhood frequency encoding map
-
-│   └── feature_columns.joblib      # Training-time column order (for serving alignment)
-
+│   ├── final_pipeline.joblib               
+│   ├── neighbourhood_freq.joblib           
+│   └── feature_columns.joblib              
 │
-
 ├── notebooks/
-
 │   ├── 01_eda.ipynb
-
 │   ├── 02_preprocessing.ipynb
-
 │   └── 03_model_training.ipynb
-
 │
-
 ├── tests/
-
-│   ├── init.py
-
+│   ├── __init__.py
 │   ├── test_health.py
-
 │   └── test_predict.py
-
 │
-
 ├── .dockerignore
-
 ├── .gitignore
-
 ├── conftest.py
-
 ├── Dockerfile
-
 ├── requirements.txt
-
 └── README.md
 ```
 ---
