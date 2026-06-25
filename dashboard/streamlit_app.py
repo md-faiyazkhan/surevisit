@@ -37,8 +37,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<h3 class="main-header">🏥 SureVisit</h3>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Healthcare Appointment No-show Risk Predictor — Decision Support System</p>', unsafe_allow_html=True)
+st.markdown('<p class="main-header">🏥 SureVisit</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Appointment No-show Risk Predictor</p>', unsafe_allow_html=True)
 
 neighbourhood_freq = joblib.load(str(ROOT_DIR / "models" / "neighbourhood_freq.joblib"))
 neighbourhood_list = sorted(neighbourhood_freq.keys())
