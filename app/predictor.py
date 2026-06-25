@@ -1,6 +1,9 @@
 import joblib
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from app.features import engineer_features
+
+INDIA_TZ = ZoneInfo("Asia/Kolkata")
 
 MODEL = joblib.load("models/final_pipeline.joblib")
 
@@ -35,5 +38,5 @@ def predict(request_data: dict) -> dict:
         "no_show_probability": round(float(probability), 4),
         "risk_level": risk_level,
         "recommended_action": recommended_action,
-        "prediction_timestamp": datetime.utcnow().isoformat()
+        "prediction_timestamp": datetime.now(INDIA_TZ).isoformat()
     }
