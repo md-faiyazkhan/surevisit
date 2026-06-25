@@ -103,8 +103,10 @@ The dataset is ~80% "attended," so a model that always predicts "will attend" sc
 ### Final Model: Random Forest
 Selected because it had the **highest ROC-AUC (0.740)** — the most reliable threshold-independent measure of discriminative power — while maintaining strong recall (0.80) for the no-show class. It's also tree-based, which made SHAP explainability fast and clean to integrate (`TreeExplainer`).
 
-### Key SHAP Findings
-The top predictive features, in order of impact, were: **WaitingDays, Age, PreviousAttendanceRate, SMS_received, AgeGroup_Senior**, and **RiskHistory**. Interestingly, `RiskHistory` had a comparatively modest impact despite being intuitively important — this is consistent with its highly skewed distribution in the data (the median patient has zero prior no-shows, and only a small fraction have more than 2), so the model had limited signal to learn from for that feature specifically. This was verified by holding `RiskHistory` constant and varying `WaitingDays`/`PreviousAttendanceRate`/`SMS_received` instead, which produced a >30-point swing in predicted probability — confirming the model's overall sensitivity is sound, even where one specific feature underperforms intuition.
+### Key Findings — Feature Importance & SHAP
+Both the model's built-in `feature_importances_` and the SHAP analysis agree on the top feature: **`WaitingDays`** (the gap between scheduling and appointment date) dominates, accounting for **61% of total feature importance** — far ahead of the next-ranked features (`Age` and `PreviousAttendanceRate`, ~6.4% each). This is consistent with healthcare scheduling research: the longer the gap between booking and the actual visit, the more likely a patient's circumstances change before the appointment.
+
+This concentration on a single feature was a deliberate point of scrutiny rather than an assumption — `RiskHistory`, despite being intuitively important, ranked comparatively low (~3.8%). Investigation showed this was due to its highly skewed distribution in the training data (the median patient has zero prior no-shows), giving the model limited variation to learn from for that specific feature. This was verified by holding `RiskHistory` constant and varying `WaitingDays`/`PreviousAttendanceRate`/`SMS_received` instead, which produced a >30-point swing in predicted probability — confirming the model's overall sensitivity is sound, even where one specific feature underperforms intuition.
 
 ---
 
