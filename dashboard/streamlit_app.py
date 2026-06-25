@@ -3,6 +3,7 @@ import sys
 import joblib
 from pathlib import Path
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
@@ -112,7 +113,9 @@ with right_col:
 
             st.markdown("")
 
-            readable_time = datetime.fromisoformat(result['prediction_timestamp']).strftime("%d %B %Y, %I:%M %p")
+            utc_time = datetime.fromisoformat(result['prediction_timestamp'])
+
+            readable_time = utc_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Asia/Kolkata")).strftime("%d %B %Y, %I:%M %p")
             st.caption(f"Prediction generated on {readable_time}")
 
             with st.expander("Prediction metadata"):
