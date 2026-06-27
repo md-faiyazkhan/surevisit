@@ -303,7 +303,7 @@ POST /predict
   "no_show_probability": 0.5383,
   "risk_level": "Medium",
   "recommended_action": "Send additional SMS reminder",
-  "prediction_timestamp": "2026-06-20T19:36:51.314675"
+  "prediction_timestamp": "2026-06-28T03:27:12.014975+05:30"
 }
 ```
 
