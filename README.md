@@ -4,6 +4,8 @@
 
 SureVisit predicts the probability that a scheduled patient will miss their appointment, classifies that risk into actionable tiers, and recommends a specific intervention — turning historical appointment data into a proactive scheduling tool for healthcare providers.
 
+![Dashboard Screenshot](screenshots/dashboard.png)
+
 ---
 
 ## 📌 Business Problem
@@ -64,6 +66,7 @@ Most clinics today identify no-shows only *after* they happen, relying on manual
 - 1 record with `Age = -1` (invalid) — removed
 - 5 records with negative waiting days (appointment before scheduling — a data entry error) — removed
 - `Handcap` originally ranged 0–4 (severity levels) with only ~0.18% of records above 0 — converted to a binary flag, since the higher severity levels had too few samples to be statistically meaningful
+- 28 of 81 neighbourhood names contained Portuguese accented characters (e.g. `ITARARÉ`, `SÃO JOSÉ`) — normalized to plain-English equivalents (`ITARARE`, `SAO JOSE`) so API consumers and dashboard users get consistent predictions regardless of how they enter the value
 
 ---
 
@@ -77,7 +80,7 @@ The dataset alone doesn't capture *why* a patient might miss an appointment — 
 | `AppointmentWeekday` / `AppointmentMonth` | Extracted from appointment date | Captures weekly/seasonal attendance patterns |
 | `AgeGroup` | Binned age (Child, Teen, Young Adult, Adult, Senior) | Attendance behavior varies by life stage |
 | `ChronicDiseaseCount` | Sum of Hipertension + Diabetes + Alcoholism flags | Patients managing chronic conditions may have different attendance patterns |
-| `Neighbourhood_Freq` | Frequency-encoded neighbourhood (appointment count) | Avoids a 81-column one-hot explosion while still capturing location signal |
+| `Neighbourhood_Freq` | Frequency-encoded neighbourhood (appointment count) | Avoids an 81-column one-hot explosion while still capturing location signal |
 | `PreviousAttendanceRate` | Patient's historical no-show rate, computed as an **expanding mean using only prior appointments** (no data leakage), with the population average as a fallback for first-time patients | The single strongest predictor of future no-show risk in most no-show literature |
 | `RiskHistory` | Cumulative count of a patient's past no-shows (expanding sum, prior-only) | Distinguishes "missed once" from "habitual no-show" |
 | `ReminderEffectivenessScore` | `SMS_received × (1 − PreviousAttendanceRate)` | Captures the interaction between reminders and a patient's underlying reliability — a reminder matters more for an unreliable patient |
@@ -97,11 +100,15 @@ Four models were trained and evaluated on the same engineered feature set, with 
 | **Random Forest** | **0.61** | **0.80** | **0.32** | **0.45** | **0.740** |
 | XGBoost | 0.65 | 0.71 | 0.33 | 0.45 | 0.736 |
 
+Evaluation included confusion matrices and ROC curves for all four models (see `notebooks/03_model_training.ipynb`), in addition to the classification metrics above.
+
 ### Why Accuracy Alone Is Misleading Here
 The dataset is ~80% "attended," so a model that always predicts "will attend" scores ~80% accuracy while being completely useless. **Recall on the no-show class is the metric that matters operationally** — missing a true no-show costs more (an empty slot, a wasted doctor-hour) than a false alarm (an extra reminder SMS).
 
 ### Final Model: Random Forest
 Selected because it had the **highest ROC-AUC (0.740)** — the most reliable threshold-independent measure of discriminative power — while maintaining strong recall (0.80) for the no-show class. It's also tree-based, which made SHAP explainability fast and clean to integrate (`TreeExplainer`).
+
+**Stability check:** 5-fold cross-validation confirmed this wasn't a lucky train-test split — mean ROC-AUC of **0.7425** (std dev **0.0011**) closely matched the single-split result.
 
 ### Key Findings — Feature Importance & SHAP
 Both the model's built-in `feature_importances_` and the SHAP analysis agree on the top feature: **`WaitingDays`** (the gap between scheduling and appointment date) dominates, accounting for **61% of total feature importance** — far ahead of the next-ranked features (`Age` and `PreviousAttendanceRate`, ~6.4% each). This is consistent with healthcare scheduling research: the longer the gap between booking and the actual visit, the more likely a patient's circumstances change before the appointment.
@@ -129,7 +136,7 @@ This project uses the well-known Kaggle "Medical Appointment No Shows" dataset, 
 - **Leakage-safe historical features** (`PreviousAttendanceRate`, `RiskHistory`) computed with proper chronological ordering, not a naive groupby that most public notebooks on this dataset use
 - **A full decision-support layer** (risk tiering + recommended action), not just a probability output
 - **SHAP-based explainability** wired into both the training pipeline and verified at the individual-prediction level
-- **A production-shaped system**: a FastAPI service with Pydantic validation, a reusable feature-engineering module shared between training and serving (avoiding train-serve skew), pytest coverage at 96%, and a containerized deployment — rather than a single analysis notebook
+- **A production-shaped system**: a FastAPI service with Pydantic validation, a reusable feature-engineering module shared between training and serving (avoiding train-serve skew), pytest coverage at 96%, and a containerized deployment available on Docker Hub — rather than a single analysis notebook
 
 ---
 
@@ -149,32 +156,35 @@ surevisit/
 │   └── streamlit_app.py
 │
 ├── data/
-│   ├── raw/         
+│   ├── raw/
 │   └── processed/
-│       ├── X_train.csv                     
-│       ├── X_test.csv                      
-│       ├── y_train.csv                     
-│       └── y_test.csv                      
+│       ├── X_train.csv
+│       ├── X_test.csv
+│       ├── y_train.csv
+│       └── y_test.csv
 │
 ├── examples/
 │   └── sample_request.json
 │
 ├── models/
-│   ├── final_pipeline.joblib               
-│   ├── neighbourhood_freq.joblib           
-│   └── feature_columns.joblib              
+│   ├── final_pipeline.joblib
+│   ├── neighbourhood_freq.joblib
+│   └── feature_columns.joblib
 │
 ├── notebooks/
 │   ├── 01_eda.ipynb
 │   ├── 02_preprocessing.ipynb
 │   └── 03_model_training.ipynb
 │
+├── screenshots/
+│   ├── dashboard.png
+│   └── api_docs.png
+│
 ├── tests/
 │   ├── __init__.py
 │   ├── test_health.py
 │   └── test_predict.py
 │
-├── .coverage
 ├── .dockerignore
 ├── .gitignore
 ├── conftest.py
@@ -182,6 +192,7 @@ surevisit/
 ├── requirements.txt
 └── README.md
 ```
+
 ---
 
 ## 🚀 Getting Started
@@ -206,13 +217,11 @@ pip install -r requirements.txt
 Download `KaggleV2-May-2016.csv` from [Kaggle](https://www.kaggle.com/datasets/joniarroba/noshowappointments) and place it in `data/raw/`.
 
 **4. Run the notebooks in order**
-
 notebooks/01_eda.ipynb
 
 notebooks/02_preprocessing.ipynb
 
 notebooks/03_model_training.ipynb
-
 This generates the processed data splits and the model artifacts in `models/`.
 
 **5. Run the FastAPI service**
@@ -231,19 +240,23 @@ Dashboard available at `http://localhost:8501`
 
 ### Option 2 — Docker
 
-**1. Build the image**
+**Pull from Docker Hub (recommended — no build required)**
 ```bash
-docker build -t mdfaiyazkhan/surevisit .
+docker pull mdfaiyazkhan/surevisit:latest
+docker run -p 8000:8000 -p 8501:8501 mdfaiyazkhan/surevisit:latest
 ```
 
-**2. Run the container**
+**Or build locally from source**
 ```bash
-docker run -p 8000:8000 -p 8501:8501 mdfaiyazkhan/surevisit
+docker build -t mdfaiyazkhan/surevisit:latest .
+docker run -p 8000:8000 -p 8501:8501 mdfaiyazkhan/surevisit:latest
 ```
 
-**3. Access**
+**Access**
 - FastAPI Docs: `http://localhost:8000/docs`
 - Streamlit Dashboard: `http://localhost:8501`
+
+Image also available on [Docker Hub](https://hub.docker.com/r/mdfaiyazkhan/surevisit).
 
 ---
 
@@ -251,8 +264,9 @@ docker run -p 8000:8000 -p 8501:8501 mdfaiyazkhan/surevisit
 
 **Base URL:** `http://localhost:8000`
 
-**Health Check**
+![API Docs Screenshot](screenshots/api_docs.png)
 
+**Health Check**
 GET /
 ```json
 {
@@ -262,8 +276,8 @@ GET /
 ```
 
 **Prediction**
-
 POST /predict
+
 **Sample Request** (see also `examples/sample_request.json`):
 ```json
 {
@@ -295,11 +309,13 @@ POST /predict
 
 > `previous_attendance_rate` and `risk_history` are optional. If omitted (e.g. for a first-time patient), the system falls back to the population-average no-show rate and zero respectively — the same logic used during training for patients without prior history.
 
+> **Note on `neighbourhood`:** values are matched against a frequency map built from the (accent-normalized) training data. Enter neighbourhood names using plain English characters (e.g. `ITARARE`, not `ITARARÉ`) for an exact match. The Streamlit dashboard avoids this entirely via a dropdown populated directly from the training data.
+
 ---
 
 ## 🖥️ Dashboard
 
-The Streamlit dashboard provides a form-based interface over the same prediction logic used by the API (no duplicate code — it imports directly from `app/predictor.py`), so administrative staff without API knowledge can use the tool. It includes a clear human-readable timestamp, color-coded risk levels, and an explicit disclaimer on every prediction.
+The Streamlit dashboard provides a form-based interface over the same prediction logic used by the API (no duplicate code — it imports directly from `app/predictor.py`), so administrative staff without API knowledge can use the tool. It includes a clear human-readable timestamp, color-coded risk levels, a neighbourhood dropdown populated from the training data, and an explicit disclaimer on every prediction.
 
 ---
 
