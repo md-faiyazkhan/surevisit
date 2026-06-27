@@ -49,7 +49,7 @@ left_col, right_col = st.columns([1, 1], gap="large")
 with left_col:
     st.subheader("Patient & Appointment Details")
 
-    with st.form("prediction_form"):
+    with st.form("prediction_form", enter_to_submit=False):
         c1, c2 = st.columns(2)
 
         with c1:
